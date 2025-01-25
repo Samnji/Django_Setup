@@ -117,7 +117,57 @@ python manage.py migrate
 echo_message "Creating superuser for Django Admin (Optional, press Ctrl+C to skip)..."
 python manage.py createsuperuser
 
-# Step 10: Git initialization
+
+# Step 10: Optional Docker and Google Cloud setup
+if [[ "$USE_DOCKER" == "yes" ]]; then
+  echo_message "Setting up Docker and Google Cloud deployment files..."
+
+  # Dockerfile
+  cat > Dockerfile <<EOL
+# Dockerfile for Django on Google Cloud
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "${PROJECT_NAME}.wsgi:application"]
+EOL
+
+  # docker-compose.yml
+  cat > docker-compose.yml <<EOL
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+EOL
+
+  # cloudbuild.yaml
+  cat > cloudbuild.yaml <<EOL
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/PROJECT_ID/${PROJECT_NAME}', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/PROJECT_ID/${PROJECT_NAME}']
+images:
+  - 'gcr.io/PROJECT_ID/${PROJECT_NAME}'
+EOL
+
+  echo_message "Docker and Google Cloud files created. Replace PROJECT_ID in cloudbuild.yaml with your Google Cloud project ID."
+fi
+
+# Step 11: Git initialization
 echo_message "Initializing Git repository..."
 git init
 git add .

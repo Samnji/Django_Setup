@@ -42,3 +42,15 @@ Save the script as `django_setup.sh` on your local machine.
 ### Step 2: Make the Script Executable
 ```bash
 chmod +x django_setup.sh
+```
+
+### Step 3: Run the Script
+```bash
+./django_setup.sh /path/to/your/project
+```
+
+### Step 4: Follow the Prompts
+Provide the requested details such as:
+- `Project name.`
+- `App name.`
+- `PostgreSQL database name, username, and password.`
