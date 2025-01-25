@@ -41,6 +41,9 @@ read DB_USER
 echo_message "Enter the PostgreSQL database password:"
 read -s DB_PASSWORD
 
+echo_message "Do you want to set up Docker for deployment? (yes/no):"
+read USE_DOCKER
+
 # Step 1: Install required tools
 echo_message "Installing required tools..."
 sudo apt update && sudo apt install -y python3 python3-pip python3-venv git curl libpq-dev
@@ -117,8 +120,25 @@ python manage.py migrate
 echo_message "Creating superuser for Django Admin (Optional, press Ctrl+C to skip)..."
 python manage.py createsuperuser
 
+# Step 10: Create .gitignore
+echo_message "Creating .gitignore..."
+cat > .gitignore <<EOL
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+env/
+*.log
+*.pot
+*.pyc
+*.pyo
+db.sqlite3
 
-# Step 10: Optional Docker and Google Cloud setup
+# Django
+staticfiles/
+EOL
+
+# Step 11: Optional Docker and Google Cloud setup
 if [[ "$USE_DOCKER" == "yes" ]]; then
   echo_message "Setting up Docker and Google Cloud deployment files..."
 
@@ -167,7 +187,7 @@ EOL
   echo_message "Docker and Google Cloud files created. Replace PROJECT_ID in cloudbuild.yaml with your Google Cloud project ID."
 fi
 
-# Step 11: Git initialization
+# Step 12: Git initialization
 echo_message "Initializing Git repository..."
 git init
 git add .

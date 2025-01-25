@@ -45,6 +45,7 @@ chmod +x django_setup.sh
 ```
 
 ### Step 3: Run the Script
+Execute the script by specifying the desired project directory:
 ```bash
 ./django_setup.sh /path/to/your/project
 ```
